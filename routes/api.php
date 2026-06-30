@@ -13,7 +13,11 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::post('register', 'App\Http\Controllers\UserController@store');
+Route::post('login', 'App\Http\Controllers\UserController@login');
+Route::post('refresh', 'App\Http\Controllers\UserController@refresh');
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('jwt.auth')->group(function ($router) {
+    Route::get('user', 'App\Http\Controllers\UserController@index');
+    Route::post('logout', 'App\Http\Controllers\UserController@logout');
 });
