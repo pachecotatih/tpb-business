@@ -28,6 +28,11 @@ class User extends Authenticatable implements JWTSubject
         'moeda',
     ];
 
+    protected $guarded = [
+        'password_reset_token',
+        'password_reset_token_expires_at',
+    ];
+
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -3,10 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -173,5 +177,178 @@ class UserTest extends TestCase
         ])->getJson('/api/user');
 
         $response->assertStatus(500);
+    }
+
+    public function test_changePasswordLogged_user_success() : void {
+
+        $user = User::factory()->create([
+            'password' => Hash::make('123456')
+        ]);
+        $token = JWTAuth::fromUser($user);
+        $data = [
+            'password' => '654321'
+        ];
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->postJson('/api/user/change-password', $data);
+        $response->assertStatus(200);
+
+        $user_bd = User::where('uid', $user->uid)->first();
+        $this->assertTrue(Hash::check('654321', $user_bd->password));
+    }
+
+    public function test_changePasswordLogged_user_failed_validation_required() : void {
+
+        $user = User::factory()->create([
+            'password' => Hash::make('123456')
+        ]);
+        $token = JWTAuth::fromUser($user);
+        $data = [];
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->postJson('/api/user/change-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('password');
+    }
+
+    public function test_changePasswordLogged_user_failed_min_validation() : void {
+
+        $user = User::factory()->create([
+            'password' => Hash::make('123456')
+        ]);
+        $token = JWTAuth::fromUser($user);
+        $data = [
+            'password' => '123'
+        ];
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->postJson('/api/user/change-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('password');
+    }
+
+    public function test_changePasswordLogged_user_failed_user_invalid() : void {
+        $user = User::factory()->create([
+            'password' => Hash::make('123456')
+        ]);
+        $token = JWTAuth::fromUser($user);
+        $data = [
+            'password' => '654321'
+        ];
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => 'abc123'
+        ])->postJson('/api/user/change-password', $data);
+        $response->assertStatus(500);
+    }
+
+    public function test_changePasswordLogged_user_failed_user_unauthorized() : void {
+        $user1 = User::factory()->create([
+            'password' => Hash::make('123456')
+        ]);
+        $user2 = User::factory()->create();
+        $token = JWTAuth::fromUser($user1);
+        $data = [
+            'password' => '654321'
+        ];
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user2->uid
+        ])->postJson('/api/user/change-password', $data);
+        $response->assertStatus(500);
+    }
+
+    public function test_forgotPassword_user_success() : void {
+        $user = User::factory()->create();
+        $data = [
+            'email' => $user->email
+        ];
+        Notification::fake();
+        $response = $this->postJson('/api/forgot-password', $data);
+        $response->assertStatus(200);
+    }
+
+    public function test_forgotPassword_user_failed_validation_required() : void {
+        $data = [];
+        $response = $this->postJson('/api/forgot-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('email');
+    }
+
+    public function test_forgotPassword_user_failed_validation_email() : void {
+        $data = [
+            'email' => 'invalid'
+        ];
+        $response = $this->postJson('/api/forgot-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('email');
+    }
+
+    public function test_resetPassword_user_success() : void {
+        Notification::fake();
+        $user = User::factory()->create();
+         Password::sendResetLink([
+            'email' => $user->email,
+        ]);
+         Notification::assertSentTo(
+            $user,
+            ResetPassword::class,
+            function ($notification) use ($user) {
+                $response = $this->postJson('/api/reset-password', [
+                    'email' => $user->email,
+                    'token' => $notification->token,
+                    'password' => 'NovaSenha123',
+                    'password_confirmation' => 'NovaSenha123',
+                ]);
+
+                $response
+                    ->assertStatus(200)
+                    ->assertJson([
+                        'message' => 'Senha alterada com sucesso.',
+                    ]);
+
+                $this->assertTrue(
+                    Hash::check(
+                        'NovaSenha123',
+                        $user->fresh()->password
+                    )
+                );
+
+                return true;
+            }
+        );
+    }
+
+    public function test_resetPassword_user_failed_validation_required() : void {
+        $data = [];
+        $response = $this->postJson('/api/reset-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['token', 'password']);
+    }
+
+    public function test_resetPassword_user_failed_validation_password() : void {
+        $token = '123456789';
+        $user = User::factory()->create();
+        $data = [
+            'token' => $token,
+            'password' => '123'
+        ];
+        $response = $this->postJson('/api/reset-password', $data);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('password');
+    }
+
+    public function test_resetPassword_user_failed_token_invalid() : void {
+        $token = '123456789';
+        $user = User::factory()->create();
+        $data = [
+            'token' => 'invalid',
+            'password' => '654321'
+        ];
+        $response = $this->postJson('/api/reset-password', $data);
+        $response->assertStatus(422);
     }
 }

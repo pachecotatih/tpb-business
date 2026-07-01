@@ -17,10 +17,15 @@ Route::post('register', 'App\Http\Controllers\UserController@store');
 Route::post('login', 'App\Http\Controllers\UserController@login');
 Route::post('refresh', 'App\Http\Controllers\UserController@refresh');
 
-Route::middleware('jwt.auth')->group(function () {
+Route::post('forgot-password', 'App\Http\Controllers\UserController@forgotPassword')->name('password.request');
+Route::post('reset-password', 'App\Http\Controllers\UserController@resetPassword');
+Route::get('reset-password/{token}', 'App\Http\Controllers\UserController@sendResetPasswordScreen');
+
+Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', 'App\Http\Controllers\UserController@index');
         Route::put('/', 'App\Http\Controllers\UserController@update');
+        Route::post('/change-password', 'App\Http\Controllers\UserController@changePasswordLogged');
     });
 
     Route::group(['prefix' => 'fluxocaixa'], function () {

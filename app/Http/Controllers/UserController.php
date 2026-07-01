@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ResetPassword;
 use App\Models\User;
 use App\Models\UserSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
@@ -16,13 +19,14 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth')->except(['login', 'refresh', 'store']);
+        $this->middleware('jwt.auth')->except(['login', 'refresh', 'store', 'forgotPassword', 'resetPassword', 'sendResetPasswordScreen']);
     }
 
     public function index(Request $request)
     {
         try {
             $user = User::where('uid', $request->header('user'))->first();
+
             if (!$user) {
                 throw new \Exception('Usuário não encontrado.', 404);
             }
@@ -151,12 +155,115 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function forgotPassword(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dados inválidos.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        return $status === Password::RESET_LINK_SENT ? response()->json(['message' => __($status)])
+                    : response()->json(['message' => __($status)], 500);
+    }
+
+    public function sendResetPasswordScreen(Request $request, string $token)
+    {
+        return response()->json([
+            'message' => 'Token recebido.',
+            'token' => $token,
+        ], 200);
+    }
+
+
+
+    public function resetPassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email' => 'required|email|exists:users,email',
+                'token' => 'required|string',
+                'password' => 'required|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Dados inválidos.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $status = Password::reset(
+                    $request->only(
+                        'email',
+                        'password',
+                        'password_confirmation',
+                        'token'
+                    ),
+                    function ($user, $password) {
+                        $user->forceFill([
+                            'password' => Hash::make($password),
+                            'remember_token' => Str::random(60),
+                        ])->save();
+                    }
+                );
+
+            if ($status === Password::PASSWORD_RESET) {
+                return response()->json([
+                    'message' => 'Senha alterada com sucesso.',
+                ]);
+            }
+            return response()->json([
+                'message' => __($status),
+            ], 400);
+        } catch (\Throwable $th) {
+            Log::error('UserController::resetPassword - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao redefinir senha.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+    public function changePasswordLogged(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string|min:6',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Dados inválidos.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $user = User::where('uid', $request->header('user'))->first();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Usuário não encontrado.'
+                ], 404);
+            }
+
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return response()->json($user);
+        } catch (\Throwable $th) {
+            Log::error('UserController::changePasswordLogged - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao atualizar usuário.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function login(Request $request)
