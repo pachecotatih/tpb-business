@@ -24,8 +24,11 @@ Route::middleware('jwt.auth')->group(function () {
     });
 
     Route::group(['prefix' => 'fluxocaixa'], function () {
+        Route::get('/', 'App\Http\Controllers\FluxoCaixaController@index');
         Route::post('/', 'App\Http\Controllers\FluxoCaixaController@store');
+        Route::get('/{uid}', 'App\Http\Controllers\FluxoCaixaController@show');
         Route::put('/{uid}', 'App\Http\Controllers\FluxoCaixaController@update');
+        Route::delete('/{uid}', 'App\Http\Controllers\FluxoCaixaController@destroy');
     });
 
     Route::post('logout', 'App\Http\Controllers\UserController@logout');

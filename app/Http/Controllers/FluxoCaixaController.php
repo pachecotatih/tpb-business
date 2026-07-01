@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 class FluxoCaixaController extends Controller
 {
     /**
@@ -37,6 +39,12 @@ class FluxoCaixaController extends Controller
                 'tipo_movimentacao' => 'required|in:entrada,saida',
                 'forma_pagamento' => 'required',
                 'pago' => 'nullable|boolean',
+                'data_vencimento' => [Rule::requiredIf(function () use ($request) {
+                    return $request->tipo_movimentacao === 'saida';
+                })],
+                'data_pagamento' => [Rule::requiredIf(function () use ($request) {
+                    return $request->tipo_movimentacao === 'entrada';
+                })],
             ]);
 
             if ($validation->fails()) {
@@ -74,9 +82,22 @@ class FluxoCaixaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $uid)
     {
-        //
+        try {
+            $fluxocaixa = FluxoCaixa::where('uid', $uid)->first();
+            if(!$fluxocaixa) {
+                return response()->json([
+                    'message' => 'Movimentação de caixa nao encontrada.'
+                ], 404);
+            }
+            return response()->json($fluxocaixa);
+        } catch (\Throwable $th) {
+            Log::error('FluxoCaixaController::show - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao buscar movimentação de caixa.'
+            ], 500);
+        }
     }
 
     /**
@@ -99,6 +120,12 @@ class FluxoCaixaController extends Controller
                 'tipo_movimentacao' => 'required|in:entrada,saida',
                 'forma_pagamento' => 'required',
                 'pago' => 'nullable|boolean',
+                'data_vencimento' => [Rule::requiredIf(function () use ($request) {
+                    return $request->tipo_movimentacao === 'saida';
+                })],
+                'data_pagamento' => [Rule::requiredIf(function () use ($request) {
+                    return $request->tipo_movimentacao === 'entrada';
+                })],
             ]);
 
             if ($validation->fails()) {
@@ -135,6 +162,17 @@ class FluxoCaixaController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $fluxoCaixa = FluxoCaixa::where('uid', $id)->first();
+            $fluxoCaixa->delete();
+            return response()->json([
+                'message' => 'Movimentação de caixa deletada com sucesso.'
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('FluxoCaixaController::destroy - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao deletar movimentação de caixa.'
+            ], 500);
+        }
     }
 }
