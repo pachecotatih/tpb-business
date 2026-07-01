@@ -176,10 +176,7 @@ class UserController extends Controller
 
     public function sendResetPasswordScreen(Request $request, string $token)
     {
-        return response()->json([
-            'message' => 'Token recebido.',
-            'token' => $token,
-        ], 200);
+        return redirect(config('app.frontend_url') . '/reset-password?token=' . $token);
     }
 
 
