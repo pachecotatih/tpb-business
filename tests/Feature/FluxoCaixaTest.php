@@ -21,6 +21,92 @@ class FluxoCaixaTest extends TestCase
         $this->user = User::factory()->create();
     }
 
+    public function test_fluxocaixa_index_success(): void
+    {
+        $token = JWTAuth::fromUser($this->user);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->getJson('/api/fluxocaixa');
+        $response->assertStatus(200);
+        $this->assertCount(8, $response->json('fluxo_caixa_list'));
+        $this->assertEquals($response->json('saldo'), 35);
+        $this->assertEquals($response->json('total_entradas'), 50);
+        $this->assertEquals($response->json('total_saidas'), -15);
+    }
+
+    public function test_fluxocaixa_index_filter_forma_pagamento_success(): void
+    {
+        $token = JWTAuth::fromUser($this->user);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->getJson('/api/fluxocaixa?forma_pagamento=dinheiro');
+        $response->assertStatus(200);
+        $this->assertCount(5, $response->json('fluxo_caixa_list'));
+        $this->assertEquals($response->json('saldo'), 50);
+        $this->assertEquals($response->json('total_entradas'), 50);
+        $this->assertEquals($response->json('total_saidas'), 0);
+    }
+
+    public function test_fluxocaixa_index_filter_tipo_movimentacao_success(): void
+    {
+        $token = JWTAuth::fromUser($this->user);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->getJson('/api/fluxocaixa?tipo_movimentacao=saida');
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('fluxo_caixa_list'));
+        $this->assertEquals($response->json('saldo'), -15);
+        $this->assertEquals($response->json('total_entradas'), 0);
+        $this->assertEquals($response->json('total_saidas'), -15);
+    }
+
+    public function test_fluxocaixa_index_filter_data_registro_success(): void
+    {
+        $token = JWTAuth::fromUser($this->user);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'), 'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s')]);
+        $data_inicio = Carbon::now()->subDays(1)->format('Y-m-d H:i:s');
+        $data_fim = Carbon::now()->addDays(1)->format('Y-m-d H:i:s');
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->getJson('/api/fluxocaixa?data_registro_inicio=' . $data_inicio . '&data_registro_fim=' . $data_fim);
+        $response->assertStatus(200);
+        $this->assertCount(8, $response->json('fluxo_caixa_list'));
+        $this->assertEquals($response->json('saldo'), 35);
+        $this->assertEquals($response->json('total_entradas'), 50);
+        $this->assertEquals($response->json('total_saidas'), -15);
+    }
+
+    public function test_fluxocaixa_index_filter_data_registro_empty_success(): void
+    {
+        $token = JWTAuth::fromUser($this->user);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'), 'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'),'created_at' => Carbon::now()->subDays(4)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s'),'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        $data_inicio = Carbon::now()->subDays(1)->format('Y-m-d H:i:s');
+        $data_fim = Carbon::now()->addDays(1)->format('Y-m-d H:i:s');
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->getJson('/api/fluxocaixa?data_registro_inicio=' . $data_inicio . '&data_registro_fim=' . $data_fim);
+        $response->assertStatus(200);
+        $this->assertCount(0, $response->json('fluxo_caixa_list'));
+        $this->assertEquals($response->json('saldo'), 0);
+        $this->assertEquals($response->json('total_entradas'), 0);
+        $this->assertEquals($response->json('total_saidas'), 0);
+    }
+
     public function test_fluxocaixa_show_success(): void
     {
         $token = JWTAuth::fromUser($this->user);

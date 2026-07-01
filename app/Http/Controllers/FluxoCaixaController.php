@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FluxoCaixa;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +15,71 @@ class FluxoCaixaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $saldo = 0;
+        $total_entradas = 0;
+        $total_saidas = 0;
+        try {
+            $user = User::where('uid', $request->header('user'))->first();
+            if (!$user) {
+                throw new \Exception('Usuário não encontrado.', 404);
+            }
+            $forma_pagamento_filter = $request->query('forma_pagamento');
+            $tipo_movimentacao_filter = $request->query('tipo_movimentacao');
+            $data_registro_inicio = $request->query('data_registro_inicio') ?? Carbon::now()->subMonth()->format('Y-m-d H:i:s');
+            $data_registro_fim = $request->query('data_registro_fim') ?? Carbon::now()->format('Y-m-d H:i:s');
+
+            $fluxoCaixa = FluxoCaixa::query();
+
+            if ($forma_pagamento_filter) {
+                $fluxoCaixa->where('forma_pagamento', $forma_pagamento_filter);
+            }
+
+            if ($tipo_movimentacao_filter) {
+                $fluxoCaixa->where('tipo_movimentacao', $tipo_movimentacao_filter);
+            }
+
+            if ($data_registro_inicio) {
+                $fluxoCaixa->where('created_at', '>=', $data_registro_inicio);
+            }
+
+            if ($data_registro_fim) {
+                $fluxoCaixa->where('created_at', '<=', $data_registro_fim);
+            }
+
+            $fluxoCaixa = $fluxoCaixa->where('user_id', $user->id)->get()->map(function ($item) {
+                    if ($item->tipo_movimentacao === 'saida') {
+                        $item->valor = $item->valor * (-1);
+                    }
+                    return $item;
+                });
+
+            if ($fluxoCaixa->isNotEmpty()) {
+                foreach ($fluxoCaixa as $item) {
+                    $saldo += $item->valor;
+                    if ($item->tipo_movimentacao === 'entrada') {
+                        $total_entradas += $item->valor;
+                    } else {
+                        $total_saidas += $item->valor;
+                    }
+                }
+            }
+
+            return response()->json([
+                'fluxo_caixa_list' => $fluxoCaixa,
+                'saldo' => $saldo,
+                'total_entradas' => $total_entradas,
+                'total_saidas' => $total_saidas
+            ], 200);
+
+
+        } catch (\Throwable $th) {
+            Log::error('FluxoCaixaController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao buscar movimentações de caixa.'
+            ], 500);
+        }
     }
 
     /**
