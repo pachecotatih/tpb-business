@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -295,11 +296,11 @@ class UserTest extends TestCase
         ]);
          Notification::assertSentTo(
             $user,
-            ResetPassword::class,
+            ResetPasswordNotification::class,
             function ($notification) use ($user) {
                 $response = $this->postJson('/api/reset-password', [
                     'email' => $user->email,
-                    'token' => $notification->token,
+                    'token' => $notification->getToken(),
                     'password' => 'NovaSenha123',
                     'password_confirmation' => 'NovaSenha123',
                 ]);

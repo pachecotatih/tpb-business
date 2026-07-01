@@ -18,8 +18,8 @@ Route::post('login', 'App\Http\Controllers\UserController@login');
 Route::post('refresh', 'App\Http\Controllers\UserController@refresh');
 
 Route::post('forgot-password', 'App\Http\Controllers\UserController@forgotPassword')->name('password.request');
-Route::post('reset-password', 'App\Http\Controllers\UserController@resetPassword');
-Route::get('reset-password/{token}', 'App\Http\Controllers\UserController@sendResetPasswordScreen');
+Route::post('reset-password', 'App\Http\Controllers\UserController@resetPassword')->name('password.update');
+Route::get('reset-password/{token}', 'App\Http\Controllers\UserController@sendResetPasswordScreen')->name('password.reset');
 
 Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
     Route::group(['prefix' => 'user'], function () {
