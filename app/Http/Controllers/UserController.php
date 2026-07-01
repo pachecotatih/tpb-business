@@ -10,22 +10,19 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.auth')->except([
-            'login',
-            'refresh',
-            'store'
-        ]);
+        $this->middleware('jwt.auth')->except(['login', 'refresh', 'store']);
     }
 
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user_uid'))->first();
+            $user = User::where('uid', $request->header('user'))->first();
             if (!$user) {
                 throw new \Exception('Usuário não encontrado.', 404);
             }
@@ -104,9 +101,54 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+
+        try {
+            $user = User::where('uid', $request->header('user'))->first();
+            if (!$user) {
+                throw new \Exception('Usuário não encontrado.', 404);
+            }
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'documento' => [
+                    'required',
+                    'string',
+                    'max:18',
+                    Rule::unique('users', 'documento')->ignore($user->id),
+                ],
+                'telefone' => 'required|string|max:20',
+                'email' => [
+                    'required',
+                    'email',
+                    Rule::unique('users', 'email')->ignore($user->id),
+                ],
+                'moeda' => 'required|string|max:2',
+            ]);
+
+            if ($validator->fails()) {
+                Log::info('UserController::update - Validation failed - ' . json_encode($validator->errors()));
+                return response()->json([
+                    'message' => 'Dados inválidos.',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            $user->update([
+                'name' => $request->name,
+                'documento' => $request->documento,
+                'telefone' => $request->telefone,
+                'email' => $request->email,
+                'moeda' => $request->moeda,
+            ]);
+
+            return response()->json($user);
+        } catch (\Throwable $th) {
+            Log::error('UserController::update - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao atualizar usuário.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -167,8 +209,7 @@ class UserController extends Controller
 
     public function refresh(Request $request)
     {
-        $session = UserSession::where('device_id', $request->device_id)
-            ->first();
+        $session = UserSession::where('device_id', $request->device_id)->first();
 
         if (! $session) {
             return response()->json(['message' => 'Nenhuma sessão encontrada. Tente novamente.'], 401);

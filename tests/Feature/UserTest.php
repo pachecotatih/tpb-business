@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -64,6 +65,62 @@ class UserTest extends TestCase
         $response->assertJsonValidationErrors('password');
     }
 
+    public function test_user_update_success() : void {
+
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $user->email = 'novoemail@example.com';
+        $user->name = 'Novo Nome';
+        $user->moeda = "$";
+
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->putJson('/api/user', $user->toArray());
+        $response->assertStatus(200);
+
+        $user_bd = User::where('uid', $user->uid)->first();
+        $this->assertEquals($user->email, $user_bd->email);
+        $this->assertEquals($user->name, $user_bd->name);
+        $this->assertEquals($user->moeda, $user_bd->moeda);
+
+    }
+
+    public function test_user_update_validation_failed() : void {
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $user->email = 'emailinvalido';
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->putJson('/api/user', $user->toArray());
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('email');
+    }
+    public function test_user_update_validation_failed_empty() : void {
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->putJson('/api/user', []);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['name', 'email', 'documento', 'telefone', 'moeda']);
+    }
+
+    public function test_user_update_validation_documento_unique_failed() : void {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+        $token = JWTAuth::fromUser($user1);
+        $user1->documento = $user2->documento;
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user1->uid
+        ])->putJson('/api/user', $user1->toArray());
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors('documento');
+    }
+
     public function test_user_login_success() : void {
         $user = User::factory()->create([
             'password' => Hash::make('123456')
@@ -95,7 +152,7 @@ class UserTest extends TestCase
         $token = JWTAuth::fromUser($user);
         $response = $this->withHeaders([
             'Authorization'=> 'Bearer ' . $token,
-            'user_uid' => $user->uid
+            'user' => $user->uid
         ])->getJson('/api/user');
         $response->assertStatus(200);
 
@@ -112,7 +169,7 @@ class UserTest extends TestCase
         $token = JWTAuth::fromUser($user);
         $response = $this->withHeaders([
             'Authorization'=> 'Bearer ' . $token,
-            'user_uid' => 'abc123'
+            'user' => 'abc123'
         ])->getJson('/api/user');
 
         $response->assertStatus(500);
