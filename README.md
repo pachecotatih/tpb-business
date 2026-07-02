@@ -1,66 +1,358 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TPB Business - Sistema de Agendamentos e Gestão Financeira
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 📋 Descrição
 
-## About Laravel
+TPB Business é um sistema de agendamentos e gestão financeira desenvolvido para pequenas empresas e microempreendedores (MEI). A plataforma permite gerenciar agendamentos de serviços, clientes, e controlar fluxo de caixa com facilidade.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+O sistema foi arquitetado como uma **API robusta** em Laravel, com integração de autenticação segura via JWT e Sanctum. Uma interface gráfica moderna será desenvolvida em um projeto separado focado no frontend.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Características Principais
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- ✅ **Agendamentos de Serviços** - Crie e gerencie agendamentos de forma simples e intuitiva
+- ✅ **Registro de Serviços** - Associe serviços aos agendamentos com dados completos
+- ✅ **Gestão de Clientes** - Cadastre clientes (pessoa física ou jurídica)
+- ✅ **Fluxo de Caixa Inteligente** - Registre receitas e despesas com filtros avançados
+- ✅ **Confirmação de Pagamentos** - Confirme pagamentos e registre automaticamente no fluxo
+- ✅ **Autenticação Segura** - Sistema de login com JWT e tokens pessoais de acesso
+- ✅ **Sessões de Usuário** - Rastreamento de sessões ativas
+- ✅ **Suporte a API REST** - Endpoints padronizados para integração com frontend
 
-## Learning Laravel
+## 🏗️ Arquitetura do Sistema
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Estrutura Técnica
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```
+Laravel 10+ | PHP 8.1+
+├── API REST com autenticação JWT/Sanctum
+├── Database: PostgreSQL
+├── ORM: Eloquent
+└── Frontend: Em desenvolvimento (projeto separado)
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Componentes Principais
 
-## Laravel Sponsors
+#### 1. **Modelos de Dados**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **User** - Usuários do sistema (donos de negócios)
+- **Cliente** - Clientes (pessoa física ou jurídica)
+- **Servico** - Tipos/categorias de serviços oferecidos
+- **Agendamento** - Agendamentos dos serviços com clientes
+- **FluxoCaixa** - Registro de receitas e despesas
+- **UserSession** - Controle de sessões ativas
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 🎯 Funcionalidades Detalhadas
 
-## Contributing
+### 📅 Agendamentos
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+O sistema permite criar e gerenciar agendamentos de forma flexível:
 
-## Code of Conduct
+```
+Agendamento
+├── Cliente (referência ao cliente)
+├── Serviço (serviço a ser prestado)
+├── Data/Hora
+├── Status (pendente, confirmado, concluído, cancelado)
+└── Notas adicionais
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Fluxo Típico:**
+1. Selecionar ou criar um cliente
+2. Escolher o serviço a ser prestado
+3. Definir data e hora do agendamento
+4. Confirmar o agendamento no sistema
+5. Após conclusão, registrar o pagamento
 
-## Security Vulnerabilities
+### 👥 Gestão de Clientes
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Cadastre clientes com informações completas:
 
-## License
+- **Dados Pessoais/Empresariais**
+  - Nome completo ou Razão social
+  - CPF ou CNPJ
+  - Email e telefone
+  - Endereço completo
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **Tipos Suportados**
+  - Pessoa Física (PF)
+  - Pessoa Jurídica (PJ)
+
+### 💰 Fluxo de Caixa
+
+Controle financeiro completo da sua empresa:
+
+#### Receitas
+- Registradas automaticamente quando pagamento é confirmado
+- Vinculadas ao agendamento e cliente
+- Data de recebimento
+
+#### Despesas
+- Registre despesas operacionais
+- Categorize por tipo
+- Acompanhe gastos recorrentes
+
+#### Funcionalidades
+- **Filtros Avançados** - Filtre por data, tipo, cliente, serviço, status
+- **Relatórios** - Visualize resumos do fluxo de caixa
+- **Confirmação de Pagamentos** - Confirme recebimentos e registre automaticamente
+
+**Fluxo de Pagamento:**
+```
+Agendamento Concluído
+    ↓
+Registrar Pagamento
+    ↓
+Confirmar Pagamento
+    ↓
+Receita registrada em Fluxo de Caixa
+    ↓
+Relatório atualizado automaticamente
+```
+
+---
+
+## 🚀 Como Usar
+
+### 1. **Primeiro Acesso**
+
+```bash
+# Clonar o repositório
+git clone https://github.com/pachecotatih/tpb-business.git
+
+# Instalar dependências
+composer install
+npm install
+
+# Configurar arquivo .env
+cp .env.example .env
+php artisan key:generate
+
+# Executar migrações
+php artisan migrate
+
+# Seed com dados de exemplo (opcional)
+php artisan db:seed
+```
+
+### 2. **Autenticação**
+
+Faça login na plataforma com suas credenciais. O sistema retorna um token JWT para uso na API.
+
+```
+POST /api/login
+{
+  "email": "usuario@example.com",
+  "password": "senha"
+}
+```
+
+### 3. **Criar um Cliente**
+
+```
+POST /api/clientes
+{
+  "nome": "João Silva",
+  "cpf": "123.456.789-00",
+  "email": "joao@example.com",
+  "telefone": "(11) 9999-9999",
+  "tipo": "PF"
+}
+```
+
+### 4. **Cadastrar Serviço**
+
+```
+POST /api/servicos
+{
+  "nome": "Corte de Cabelo",
+  "descricao": "Corte de cabelo masculino",
+  "valor": 50.00
+}
+```
+
+### 5. **Criar Agendamento**
+
+```
+POST /api/agendamentos
+{
+  "cliente_id": 1,
+  "servico_id": 1,
+  "data": "2026-07-15",
+  "hora": "14:30",
+  "status": "pendente"
+}
+```
+
+### 6. **Registrar Pagamento e Receita**
+
+```
+POST /api/fluxo-caixa
+{
+  "agendamento_id": 1,
+  "tipo": "receita",
+  "valor": 50.00,
+  "descricao": "Pagamento recebido - Corte de cabelo",
+  "data": "2026-07-15",
+  "status": "confirmado"
+}
+```
+
+### 7. **Registrar Despesa**
+
+```
+POST /api/fluxo-caixa
+{
+  "tipo": "despesa",
+  "valor": 150.00,
+  "descricao": "Compra de produtos para uso no salão",
+  "categoria": "insumos",
+  "data": "2026-07-01",
+  "status": "confirmada"
+}
+```
+
+### 8. **Filtrar Fluxo de Caixa**
+
+```
+GET /api/fluxo-caixa?
+    tipo=receita&
+    data_inicio=2026-07-01&
+    data_fim=2026-07-31&
+    status=confirmado&
+    categoria=servicos
+```
+
+---
+
+## 📊 Casos de Uso
+
+### Cabeleireiro / Salão de Beleza
+1. Registre seus serviços (corte, tinta, progressiva, etc.)
+2. Clientes fazem agendamentos
+3. Confirme quando o cliente pagar
+4. Receita é registrada automaticamente
+5. Acompanhe ganhos mensais
+
+### Consultor / Freelancer
+1. Agende consultorias com clientes
+2. Após conclusão, registre o pagamento
+3. Acompanhe fluxo de receitas
+4. Registre despesas (software, material, etc.)
+5. Visualize lucro líquido
+
+### Pequeno Negócio
+1. Cadastre clientes PJ e PF
+2. Gerencie múltiplos serviços
+3. Controle agendamentos
+4. Acompanhe fluxo de caixa completo
+5. Exporte relatórios financeiros
+
+---
+
+## 🔒 Segurança
+
+- **Autenticação JWT** - Tokens seguros para API
+- **Sanctum** - Proteção de endpoints da API
+- **Validação de Entrada** - Proteção contra injeção de dados
+- **Criptografia** - Senhas criptografadas no banco de dados
+- **Controle de Acesso** - Cada usuário acessa apenas seus dados
+
+---
+
+## 🎨 Interface do Usuário (Em Desenvolvimento)
+
+Uma interface gráfica moderna será desenvolvida em um projeto separado com:
+
+- Dashboard intuitivo com resumo do fluxo de caixa
+- Calendário visual para agendamentos
+- Gráficos de receitas e despesas
+- Relatórios exportáveis (PDF, Excel)
+- Notificações e lembretes
+- Responsivo para mobile
+
+**Projeto Frontend**: *(Link será disponibilizado em breve)*
+
+---
+
+## 📦 Requisitos do Sistema
+
+- PHP 8.1 ou superior
+- Composer
+- Node.js 16+ (para assets)
+- Banco de dados (PostgreSQL ou MySQL)
+- Git
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### Backend
+- **Laravel 10+** - Framework PHP
+- **Eloquent ORM** - Manipulação de dados
+- **JWT** - Autenticação de API
+- **Sanctum** - Proteção de endpoints
+- **PHPUnit** - Testes automatizados
+
+### Frontend (Em Desenvolvimento)
+- React / Vue.js / Svelte
+- TypeScript
+- Tailwind CSS ou similar
+- Responsive Design
+
+---
+
+## 📋 Roadmap Futuro
+
+- [ ] Interface gráfica completa
+- [ ] Relatórios avançados com gráficos
+- [ ] Sistema de notificações por SMS/Email
+- [ ] Integração com gateway de pagamento
+- [ ] App mobile nativo
+- [ ] Backup automático de dados
+- [ ] Multi-idioma (português, inglês, espanhol)
+- [ ] API de terceiros para CRM
+- [ ] Agendamento automático de lembretes
+
+---
+
+## 📞 Suporte
+
+Para dúvidas ou problemas:
+
+1. Consulte a documentação da API
+2. Verifique logs em `storage/logs/`
+3. Entre em contato: [seu email/contato]
+
+---
+
+## 📝 Licença
+
+Este projeto é proprietário. Todos os direitos reservados.
+
+---
+
+## 👨‍💻 Desenvolvimento
+
+### Executar servidor de desenvolvimento
+
+```bash
+php artisan serve
+npm run dev
+```
+
+### Executar testes
+
+```bash
+php artisan test
+```
+
+### Seed de dados
+
+```bash
+php artisan db:seed
+```
+
+---
+
+**TPB Business** - Facilitando a gestão de pequenos negócios 💼
