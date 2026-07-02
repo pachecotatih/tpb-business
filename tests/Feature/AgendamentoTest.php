@@ -251,4 +251,16 @@ class AgendamentoTest extends TestCase
         $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
         $this->assertCount(6, $servicos_agendamento);
     }
+
+    public function test_destroy_agendamento_success() : void {
+        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id]);
+        $token = JWTAuth::fromUser($this->user);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->delete('/api/agendamento/' . $agendamento->uid);
+        $response->assertStatus(200);
+        $agendamento_bd = Agendamento::where('uid', $agendamento->uid)->first();
+        $this->assertNull($agendamento_bd);
+    }
 }
