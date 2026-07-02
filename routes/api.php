@@ -36,5 +36,13 @@ Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
         Route::delete('/{uid}', 'App\Http\Controllers\FluxoCaixaController@destroy');
     });
 
+    Route::group(['prefix' => 'cliente'], function () {
+        Route::get('/', 'App\Http\Controllers\ClienteController@index');
+        Route::post('/', 'App\Http\Controllers\ClienteController@store');
+        Route::get('/{uid}', 'App\Http\Controllers\ClienteController@show');
+        Route::put('/{uid}', 'App\Http\Controllers\ClienteController@update');
+        Route::delete('/{uid}', 'App\Http\Controllers\ClienteController@destroy');
+    });
+
     Route::post('logout', 'App\Http\Controllers\UserController@logout');
 });
