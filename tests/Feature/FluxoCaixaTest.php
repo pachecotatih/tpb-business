@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Agendamento;
+use App\Models\Cliente;
 use App\Models\FluxoCaixa;
+use App\Models\Servico;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -172,6 +175,49 @@ class FluxoCaixaTest extends TestCase
         $this->assertEquals($fluxoCaixa->forma_pagamento, $fluxoCaixa_bd->forma_pagamento);
         $this->assertEquals($fluxoCaixa->pago, $fluxoCaixa_bd->pago);
         $this->assertEquals($fluxoCaixa->data_pagamento, $fluxoCaixa_bd->data_pagamento);
+
+    }
+    public function test_fluxocaixa_store_entrada_agendamento_pago_success(): void
+    {
+        $cliente = Cliente::factory()->create();
+        $servico = Servico::factory()->create(
+            [
+                'user_id' => $this->user->id
+            ]
+        );
+        $agendamento = Agendamento::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => 'agendado',
+            'cliente_id' => $cliente->id
+        ]);
+        $agendamento->servicos()->attach([
+            $servico->id => [
+                'valor_servico' => $servico->valor_padrao,
+                'duracao_servico' => $servico->duracao_padrao
+            ]
+        ]);
+        $token = JWTAuth::fromUser($this->user);
+        $fluxoCaixa = FluxoCaixa::factory()->make();
+        $fluxoCaixa->tipo_movimentacao = 'entrada';
+        $fluxoCaixa->pago = true;
+        $fluxoCaixa->data_pagamento = Carbon::now()->format('Y-m-d H:i:s');
+        $fluxoCaixa->agendamento_id = $agendamento->id;
+        $fluxoCaixa->cliente_id = $cliente->id;
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->postJson('/api/fluxocaixa', $fluxoCaixa->toArray());
+        $response->assertStatus(200);
+
+        $fluxoCaixa_bd = FluxoCaixa::latest()->first();
+        $this->assertEquals($fluxoCaixa->descricao, $fluxoCaixa_bd->descricao);
+        $this->assertEquals($fluxoCaixa->valor, $fluxoCaixa_bd->valor);
+        $this->assertEquals($fluxoCaixa->tipo_movimentacao, $fluxoCaixa_bd->tipo_movimentacao);
+        $this->assertEquals($fluxoCaixa->forma_pagamento, $fluxoCaixa_bd->forma_pagamento);
+        $this->assertEquals($fluxoCaixa->pago, $fluxoCaixa_bd->pago);
+        $this->assertEquals($fluxoCaixa->data_pagamento, $fluxoCaixa_bd->data_pagamento);
+        $this->assertEquals($fluxoCaixa->agendamento_id, $fluxoCaixa_bd->agendamento_id);
+        $this->assertEquals($fluxoCaixa->cliente_id, $fluxoCaixa_bd->cliente_id);
 
     }
     public function test_fluxocaixa_store_validation_data_vencimento_required_failed(): void

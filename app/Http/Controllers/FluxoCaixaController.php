@@ -131,6 +131,12 @@ class FluxoCaixaController extends Controller
             $fluxoCaixa->pago = $request->pago ?? false;
             $fluxoCaixa->observacao = $request->observacao;
             $fluxoCaixa->user_id = $user->id;
+            if(!empty($request->cliente_id)){
+                $fluxoCaixa->cliente_id = $request->cliente_id;
+            }
+            if(!empty($request->agendamento_id)){
+                $fluxoCaixa->agendamento_id = $request->agendamento_id;
+            }
             $fluxoCaixa->save();
 
             return response()->json($fluxoCaixa);
@@ -207,6 +213,12 @@ class FluxoCaixaController extends Controller
             $fluxoCaixa->data_pagamento = $request->data_pagamento;
             if(isset($request->pago)){
                 $fluxoCaixa->pago = $request->pago;
+            }
+            if(!empty($request->cliente_id)){
+                $fluxoCaixa->cliente_id = $request->cliente_id;
+            }
+            if(!empty($request->agendamento_id)){
+                $fluxoCaixa->agendamento_id = $request->agendamento_id;
             }
             $fluxoCaixa->observacao = $request->observacao;
             $fluxoCaixa->save();

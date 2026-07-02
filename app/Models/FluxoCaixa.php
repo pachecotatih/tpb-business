@@ -22,6 +22,8 @@ class FluxoCaixa extends Model
         'pago',
         'observacao',
         'user_id',
+        'cliente_id',
+        'agendamento_id',
     ];
 
     protected static function boot()
@@ -35,5 +37,15 @@ class FluxoCaixa extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class);
+    }
+
+    public function agendamento()
+    {
+        return $this->hasOne(Agendamento::class);
     }
 }

@@ -67,6 +67,7 @@ class ClienteController extends Controller
             $cliente->documento = $request->documento;
             $cliente->observacao = $request->observacao;
             $cliente->user_id = $user->id;
+
             $cliente->save();
             return response()->json($cliente);
 
