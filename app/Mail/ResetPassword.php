@@ -17,6 +17,7 @@ class ResetPassword extends Mailable
     private User $user;
     private string $token;
     private string $fromEmail;
+    private string $appName;
 
     /**
      * Create a new message instance.
@@ -26,6 +27,7 @@ class ResetPassword extends Mailable
         $this->user = $user;
         $this->token = $token;
         $this->fromEmail = config('mail.from.address');
+        $this->appName = config('app.name');
     }
 
     /**
@@ -34,8 +36,8 @@ class ResetPassword extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address($this->fromEmail, 'Gestão Financeira e Negócios'),
-            subject: 'Gestão Financeira e Negócios | Redefinição de Senha',
+            from: new Address($this->fromEmail, $this->appName),
+            subject: $this->appName . ' | Redefinição de Senha',
         );
     }
 
