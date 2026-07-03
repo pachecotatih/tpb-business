@@ -18,13 +18,13 @@ class ClienteController extends Controller
         try {
             $user = User::where('uid', $request->header('user'))->first();
             if(!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
             $clientes = Cliente::where('user_id', $user->id)->get();
             return response()->json($clientes);
         } catch (\Exception $e) {
             Log::error('ClienteController::index - ' . $e->getMessage(). ' - ' . $e->getCode(). ' - ' . $e->getFile(). ' - ' . $e->getLine());
-            return response()->json(['error' => 'Erro ao buscar clientes: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao buscar clientes: ' . $e->getMessage()], 500);
         }
     }
 
@@ -55,7 +55,7 @@ class ClienteController extends Controller
             }
             $user = User::where('uid', $request->header('user'))->first();
             if(!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
             $cliente = new Cliente();
             $cliente->nome = $request->nome;
@@ -73,7 +73,7 @@ class ClienteController extends Controller
 
         } catch (\Throwable $th) {
             Log::error('ClienteController::store - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json(['error' => 'Erro ao validar cliente: ' . $th->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao validar cliente: ' . $th->getMessage()], 500);
         }
     }
 
@@ -85,12 +85,12 @@ class ClienteController extends Controller
         try {
             $cliente = Cliente::where('uid', $uid)->first();
             if(!$cliente) {
-                return response()->json(['error' => 'Cliente não encontrado'], 404);
+                return response()->json(['message' => 'Cliente não encontrado'], 404);
             }
             return response()->json($cliente);
         } catch (\Throwable $th) {
             Log::error('ClienteController::show - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json(['error' => 'Erro ao buscar cliente: ' . $th->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao buscar cliente: ' . $th->getMessage()], 500);
         }
     }
 
@@ -137,7 +137,7 @@ class ClienteController extends Controller
             return response()->json($cliente);
         } catch (\Throwable $th) {
             Log::error('ClienteController::update - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json(['error' => 'Erro ao atualizar cliente: ' . $th->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao atualizar cliente: ' . $th->getMessage()], 500);
         }
     }
 
@@ -157,7 +157,7 @@ class ClienteController extends Controller
             return response()->json(['message' => 'Cliente excluido com sucesso']);
         } catch (\Throwable $th) {
             Log::error('ClienteController::destroy - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json(['error' => 'Erro ao excluir cliente: ' . $th->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao excluir cliente: ' . $th->getMessage()], 500);
         }
     }
 }

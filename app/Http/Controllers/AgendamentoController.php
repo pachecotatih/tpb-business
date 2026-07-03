@@ -19,13 +19,13 @@ class AgendamentoController extends Controller
         try {
             $user = User::where('uid', $request->header('user'))->first();
             if(!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
             $agendamentos = Agendamento::with('servicos', 'cliente')->where('user_id', $user->id)->get();
             return response()->json($agendamentos);
         } catch (\Throwable $th) {
             Log::error('AgendamentoController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json(['error' => 'Erro ao buscar agendamentos: ' . $th->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao buscar agendamentos: ' . $th->getMessage()], 500);
         }
     }
 
@@ -60,7 +60,7 @@ class AgendamentoController extends Controller
 
             $user = User::where('uid', $request->header('user'))->first();
             if(!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
 
             $agendamento = new Agendamento();

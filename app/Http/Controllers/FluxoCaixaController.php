@@ -23,7 +23,7 @@ class FluxoCaixaController extends Controller
         try {
             $user = User::where('uid', $request->header('user'))->first();
             if (!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
             $forma_pagamento_filter = $request->query('forma_pagamento');
             $tipo_movimentacao_filter = $request->query('tipo_movimentacao');
@@ -119,7 +119,7 @@ class FluxoCaixaController extends Controller
 
             $user = User::where('uid', $request->header('user'))->first();
             if (!$user) {
-                return response()->json(['error' => 'Usuário não encontrado'], 404);
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
             $fluxoCaixa = new FluxoCaixa();
             $fluxoCaixa->descricao = $request->descricao;

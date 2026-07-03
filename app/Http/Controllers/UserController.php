@@ -28,7 +28,7 @@ class UserController extends Controller
             $user = User::where('uid', $request->header('user'))->first();
 
             if (!$user) {
-                return response()->json(['error' => 'Usuário nao encontrado'], 404);
+                return response()->json(['message' => 'Usuário nao encontrado'], 404);
             }
             return response()->json($user);
         } catch (\Throwable $th) {
@@ -111,7 +111,7 @@ class UserController extends Controller
         try {
             $user = User::where('uid', $request->header('user'))->first();
             if (!$user) {
-                return response()->json(['error' => 'Usuário nao encontrado'], 404);
+                return response()->json(['message' => 'Usuário nao encontrado'], 404);
             }
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
