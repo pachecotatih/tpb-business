@@ -44,6 +44,14 @@ Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
         Route::delete('/{uid}', 'App\Http\Controllers\ClienteController@destroy');
     });
 
+    Route::group(['prefix' => 'servico'], function () {
+        Route::get('/', 'App\Http\Controllers\ServicoController@index');
+        Route::post('/', 'App\Http\Controllers\ServicoController@store');
+        Route::get('/{uid}', 'App\Http\Controllers\ServicoController@show');
+        Route::put('/{uid}', 'App\Http\Controllers\ServicoController@update');
+        Route::delete('/{uid}', 'App\Http\Controllers\ServicoController@destroy');
+    });
+
     Route::group(['prefix' => 'agendamento'], function () {
         Route::get('/', 'App\Http\Controllers\AgendamentoController@index');
         Route::post('/', 'App\Http\Controllers\AgendamentoController@store');
