@@ -294,8 +294,13 @@ class UserController extends Controller
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
+            'user' => $user,
             'expires_in' => config('jwt.ttl') * 60,
-            'token_type' => 'Bearer'
+            'token_type' => 'Bearer',
+            'device_id' => $request->device_id,
+            'email' => $user->email,
+            'moeda' => $user->moeda,
+            'name' => $user->name
         ]);
     }
     public function logout(Request $request)
