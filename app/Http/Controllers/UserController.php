@@ -278,7 +278,7 @@ class UserController extends Controller
 
         $refreshToken = Str::random(64);
 
-        UserSession::updateOrCreate(
+        UserSession::updateOrInsert(
             [
                 'user_id' => $user->id,
                 'device_id' => $request->device_id
@@ -294,7 +294,7 @@ class UserController extends Controller
         return response()->json([
             'access_token' => $accessToken,
             'refresh_token' => $refreshToken,
-            'user' => $user,
+            'user' => $user->uid,
             'expires_in' => config('jwt.ttl') * 60,
             'token_type' => 'Bearer',
             'device_id' => $request->device_id,
