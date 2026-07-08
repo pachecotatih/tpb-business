@@ -113,7 +113,7 @@ class FluxoCaixaController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()
+                    'errors' => $validation->errors()->first()
                 ], 422);
             }
 
@@ -200,7 +200,7 @@ class FluxoCaixaController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()
+                    'errors' => $validation->errors()->first()
                 ], 422);
             }
 
