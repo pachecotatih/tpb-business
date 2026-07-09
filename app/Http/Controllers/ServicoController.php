@@ -52,7 +52,7 @@ class ServicoController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()->first()
+                    'errors' => $validation->errors()
                 ], 422);
             }
 
@@ -72,9 +72,11 @@ class ServicoController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()->first()
+                    'errors' => $validation->errors()
                 ], 422);
             }
+
+            return response()->json($servico);
         } catch (\Throwable $th) {
             Log::error('ServicoController::store - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
             return response()->json([
@@ -129,7 +131,7 @@ class ServicoController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()->first()
+                    'errors' => $validation->errors()
                 ], 422);
             }
 
@@ -145,8 +147,30 @@ class ServicoController extends Controller
             $servico->duracao_padrao = $request->duracao_padrao;
             $servico->ativo = $request->ativo;
             $servico->save();
+
+            return response()->json($servico);
         } catch (\Throwable $th) {
             Log::error('ServicoController::update - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao atualizar serviço.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateAtivo(Request $request, string $uid) {
+        try {
+            $servico = Servico::where('uid', $uid)->first();
+            if (!$servico) {
+                return response()->json([
+                    'message' => 'Serviço nao encontrado.'
+                ], 404);
+            }
+            $servico->ativo = $request->ativo??true;
+            $servico->save();
+            return response()->json($servico);
+        } catch (\Throwable $th) {
+            Log::error('ServicoController::updateAtivo - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
             return response()->json([
                 'message' => 'Erro ao atualizar serviço.',
                 'error' => $th->getMessage()

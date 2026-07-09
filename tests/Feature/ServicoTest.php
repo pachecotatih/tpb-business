@@ -131,6 +131,18 @@ class ServicoTest extends TestCase
         $response->assertJsonValidationErrors(['nome']);
     }
 
+    function test_update_ativo_servico_success() {
+        $servico = Servico::factory()->create(['user_id' => $this->user->id,'ativo' => true]);
+        $token = JWTAuth::fromUser($this->user);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->putJson('/api/servico/' . $servico->uid . '/ativo', ['ativo' => false]);
+        $response->assertStatus(200);
+        $servico_bd = Servico::where('uid', $servico->uid)->first();
+        $this->assertNotTrue($servico_bd->ativo);
+    }
+
     function test_destroy_servico_success() {
         $servico = Servico::factory()->create(['user_id' => $this->user->id]);
         $token = JWTAuth::fromUser($this->user);

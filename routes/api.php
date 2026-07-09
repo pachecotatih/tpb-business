@@ -49,6 +49,7 @@ Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
         Route::post('/', 'App\Http\Controllers\ServicoController@store');
         Route::get('/{uid}', 'App\Http\Controllers\ServicoController@show');
         Route::put('/{uid}', 'App\Http\Controllers\ServicoController@update');
+        Route::put('/{uid}/ativo', 'App\Http\Controllers\ServicoController@updateAtivo');
         Route::delete('/{uid}', 'App\Http\Controllers\ServicoController@destroy');
     });
 

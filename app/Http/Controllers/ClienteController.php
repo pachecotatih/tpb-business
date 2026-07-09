@@ -50,7 +50,7 @@ class ClienteController extends Controller
             if ($validation->fails()) {
                return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()->first()
+                    'errors' => $validation->errors()
                 ], 422);
             }
             $user = User::where('uid', $request->header('user'))->first();
@@ -116,7 +116,7 @@ class ClienteController extends Controller
             if ($validation->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validation->errors()->first()
+                    'errors' => $validation->errors()
                 ], 422);
             }
             $cliente = Cliente::where('uid', $uid)->first();

@@ -61,7 +61,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Dados inválidos.',
-                'errors' => $validator->errors()->first()
+                'errors' => $validator->errors()
             ], 422);
         }
 
@@ -134,7 +134,7 @@ class UserController extends Controller
                 Log::info('UserController::update - Validation failed - ' . json_encode($validator->errors()));
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validator->errors()->first()
+                    'errors' => $validator->errors()
                 ], 422);
             }
             $user->update([
@@ -164,7 +164,7 @@ class UserController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Dados inválidos.',
-                'errors' => $validator->errors()->first()
+                'errors' => $validator->errors()
             ], 422);
         }
 
@@ -193,7 +193,7 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validator->errors()->first()
+                    'errors' => $validator->errors()
                 ], 422);
             }
 
@@ -238,7 +238,7 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'message' => 'Dados inválidos.',
-                    'errors' => $validator->errors()->first()
+                    'errors' => $validator->errors()
                 ], 422);
             }
 
