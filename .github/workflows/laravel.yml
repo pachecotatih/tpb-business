@@ -40,7 +40,6 @@ jobs:
       run: grep JWT_SECRET .env
     - name: Execute tests (Feature tests) via PHPUnit/Pest
       env:
-        JWT_SECRET: ${{ secrets.JWT_SECRET }}
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: php artisan test
