@@ -40,11 +40,14 @@ class FluxoCaixaController extends Controller
                 $fluxoCaixa->where('tipo_movimentacao', $tipo_movimentacao_filter);
             }
 
-            if ($data_registro_inicio) {
+            if($data_registro_inicio && $data_registro_fim) {
+                $fluxoCaixa->whereBetween('created_at', [
+                    Carbon::parse($data_registro_inicio)->startOfDay(),
+                    Carbon::parse($data_registro_fim)->endOfDay(),
+                ]);
+            } else if ($data_registro_inicio) {
                 $fluxoCaixa->where('created_at', '>=', $data_registro_inicio);
-            }
-
-            if ($data_registro_fim) {
+            } else if ($data_registro_fim) {
                 $fluxoCaixa->where('created_at', '<=', $data_registro_fim);
             }
 
