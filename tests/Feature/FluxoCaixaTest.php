@@ -333,7 +333,7 @@ class FluxoCaixaTest extends TestCase
         $this->assertEquals(20.00, $fluxoCaixa_bd->valor);
         $this->assertEquals('saida', $fluxoCaixa_bd->tipo_movimentacao);
         $this->assertEquals('cartao', $fluxoCaixa_bd->forma_pagamento);
-        $this->assertTrue($fluxoCaixa_bd->pago);
+        $this->assertEquals(1, $fluxoCaixa_bd->pago);
         $this->assertEquals($fluxoCaixa->data_vencimento, $fluxoCaixa_bd->data_vencimento);
     }
 
@@ -359,7 +359,7 @@ class FluxoCaixaTest extends TestCase
         $this->assertEquals(20.00, $fluxoCaixa_bd->valor);
         $this->assertEquals('entrada', $fluxoCaixa_bd->tipo_movimentacao);
         $this->assertEquals('cartao', $fluxoCaixa_bd->forma_pagamento);
-        $this->assertTrue($fluxoCaixa_bd->pago);
+        $this->assertEquals(1, $fluxoCaixa_bd->pago);
         $this->assertEquals($fluxoCaixa->data_pagamento, $fluxoCaixa_bd->data_pagamento);
     }
 
