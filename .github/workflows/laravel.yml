@@ -36,6 +36,8 @@ jobs:
       run: php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\Laravel\ServiceProvider"
     - name: Create JWT Secret Key
       run: php artisan jwt:secret
+    - name: Verify JWT
+      run: grep JWT_SECRET .env
     - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
       env:
         DB_CONNECTION: sqlite
