@@ -32,6 +32,10 @@ jobs:
       run: |
         mkdir -p database
         touch database/database.sqlite
+    - name: Publish JWT config
+      run: php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\Laravel\ServiceProvider"
+    - name: Create JWT Secret Key
+      run: php artisan jwt:secret
     - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
       env:
         DB_CONNECTION: sqlite
