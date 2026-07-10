@@ -21,10 +21,7 @@ jobs:
         php-version: '8.1'
         extensions: dom, curl, libxml, mbstring, zip, fileinfo, intl, pgsql
     - name: Copy .env
-      run: cp .env.example .env
-
-    - name: Create testing environment
-      run: cp .env .env.testing
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Dependencies
       run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: Generate key
@@ -43,7 +40,6 @@ jobs:
       run: grep JWT_SECRET .env
     - name: Execute tests (Feature tests) via PHPUnit/Pest
       env:
-        APP_ENV: testing
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
