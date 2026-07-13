@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('uid')->unique();
             $table->timestamp('data_inicio');
             $table->timestamp('data_fim');
-            $table->enum('status', ['agendado', 'concluido', 'cancelado'])->default('pendente');
+            $table->enum('status', ['pendente', 'agendado', 'concluido', 'cancelado'])->default('pendente');
             $table->double('valor_total');
             $table->text('observacao')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');

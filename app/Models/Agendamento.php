@@ -41,4 +41,8 @@ class Agendamento extends Model
     {
         return $this->belongsToMany(Servico::class, 'agendamentos_servicos')->withPivot('valor_servico', 'duracao_servico')->withTimestamps();
     }
+
+    public function fluxoCaixa() {
+        return $this->hasOne(FluxoCaixa::class);
+    }
 }

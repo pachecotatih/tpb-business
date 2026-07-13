@@ -4,8 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Agendamento;
 use App\Models\Cliente;
+use App\Models\FluxoCaixa;
 use App\Models\Servico;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -114,6 +116,34 @@ class AgendamentoTest extends TestCase
     public function test_update_agendamento_success() {
         $cliente = Cliente::factory()->create(['user_id' => $this->user->id]);
         $servicos = Servico::factory()->count(3)->create(['user_id' => $this->user->id]);
+        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'pendente']);
+        $token = JWTAuth::fromUser($this->user);
+        $agendamento->status = 'agendado';
+        $agendamento->servicos = $servicos;
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $this->user->uid
+        ])->putJson('/api/agendamento/' . $agendamento->uid, $agendamento->toArray());
+
+        $response->assertStatus(200);
+
+        $agendamento_bd = Agendamento::latest()->first();
+        $servicos_agendamento = $agendamento_bd->servicos;
+
+        $this->assertNotNull($agendamento_bd);
+        $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
+        $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
+        $this->assertEquals($agendamento->data_fim, $agendamento_bd->data_fim);
+        $this->assertEquals('agendado', $agendamento_bd->status);
+        $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
+        $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);
+        $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
+        $this->assertCount(3, $servicos_agendamento);
+    }
+
+    public function test_update_agendamento_concluido_success() {
+        $cliente = Cliente::factory()->create(['user_id' => $this->user->id]);
+        $servicos = Servico::factory()->count(3)->create(['user_id' => $this->user->id]);
         $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'agendado']);
         $token = JWTAuth::fromUser($this->user);
         $agendamento->status = 'concluido';
@@ -131,12 +161,20 @@ class AgendamentoTest extends TestCase
         $this->assertNotNull($agendamento_bd);
         $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
         $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
-        $this->assertEquals($agendamento->data_fim, $agendamento_bd->data_fim);
+        $this->assertEquals(Carbon::now()->format('Y-m-d H:i:s'), $agendamento_bd->data_fim);
         $this->assertEquals('concluido', $agendamento_bd->status);
         $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
         $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);
         $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
         $this->assertCount(3, $servicos_agendamento);
+
+        $fluxoCaixaBd = $agendamento_bd->fluxoCaixa()->first();
+
+        $this->assertNotNull($fluxoCaixaBd);
+        $this->assertEquals($agendamento->valor_total, $fluxoCaixaBd->valor);
+        $this->assertEquals($agendamento->cliente_id, $fluxoCaixaBd->cliente_id);
+        $this->assertEquals('entrada', $fluxoCaixaBd->tipo_movimentacao);
+        $this->assertEquals(Carbon::now()->format('Y-m-d H:i:s'), $fluxoCaixaBd->data_pagamento);
     }
 
     public function test_update_agendamento_failed_validation() : void {
@@ -165,9 +203,9 @@ class AgendamentoTest extends TestCase
     public function test_update_agendamento_servicos_inexistentes() {
         $cliente = Cliente::factory()->create(['user_id' => $this->user->id]);
         $servicos = Servico::factory()->count(3)->make(['user_id' => $this->user->id]);
-        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'agendado']);
+        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'pendente']);
         $token = JWTAuth::fromUser($this->user);
-        $agendamento->status = 'concluido';
+        $agendamento->status = 'agendado';
         $agendamento->servicos = $servicos;
         $response = $this->withHeaders([
             'Authorization'=> 'Bearer ' . $token,
@@ -183,7 +221,7 @@ class AgendamentoTest extends TestCase
         $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
         $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
         $this->assertEquals($agendamento->data_fim, $agendamento_bd->data_fim);
-        $this->assertEquals('concluido', $agendamento_bd->status);
+        $this->assertEquals('agendado', $agendamento_bd->status);
         $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
         $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);
         $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
@@ -194,9 +232,9 @@ class AgendamentoTest extends TestCase
         $servicos_exists = Servico::factory()->count(3)->create(['user_id' => $this->user->id]);
         $servicos_inexists = Servico::factory()->count(3)->make(['user_id' => $this->user->id]);
         $servicos = collect($servicos_exists->all())->merge($servicos_inexists)->values();
-        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'agendado']);
+        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'pendente']);
         $token = JWTAuth::fromUser($this->user);
-        $agendamento->status = 'concluido';
+        $agendamento->status = 'agendado';
         $agendamento->servicos = $servicos;
         $response = $this->withHeaders([
             'Authorization'=> 'Bearer ' . $token,
@@ -212,7 +250,7 @@ class AgendamentoTest extends TestCase
         $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
         $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
         $this->assertEquals($agendamento->data_fim, $agendamento_bd->data_fim);
-        $this->assertEquals('concluido', $agendamento_bd->status);
+        $this->assertEquals('agendado', $agendamento_bd->status);
         $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
         $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);
         $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
@@ -223,13 +261,13 @@ class AgendamentoTest extends TestCase
         $servicos_exists = Servico::factory()->count(3)->create(['user_id' => $this->user->id]);
         $servicos_inexists = Servico::factory()->count(3)->make(['user_id' => $this->user->id]);
 
-        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'agendado']);
+        $agendamento = Agendamento::factory()->create(['user_id' => $this->user->id, 'cliente_id' => $cliente->id, 'status'=>'pendente']);
         foreach ($servicos_exists as $servico) {
             $agendamento->servicos()->attach([$servico->id=>['valor_servico' => $servico->valor_padrao, 'duracao_servico' => $servico->duracao_padrao]]);
         }
         $servicos = collect($servicos_exists->all())->merge($servicos_inexists)->values();
         $token = JWTAuth::fromUser($this->user);
-        $agendamento->status = 'concluido';
+        $agendamento->status = 'agendado';
         $agendamento->servicos = $servicos;
         $response = $this->withHeaders([
             'Authorization'=> 'Bearer ' . $token,
@@ -245,7 +283,7 @@ class AgendamentoTest extends TestCase
         $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
         $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
         $this->assertEquals($agendamento->data_fim, $agendamento_bd->data_fim);
-        $this->assertEquals('concluido', $agendamento_bd->status);
+        $this->assertEquals('agendado', $agendamento_bd->status);
         $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
         $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);
         $this->assertArrayHasKey('nome', $servicos_agendamento[0]);
