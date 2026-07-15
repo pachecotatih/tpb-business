@@ -28,6 +28,10 @@ Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
         Route::post('/change-password', 'App\Http\Controllers\UserController@changePasswordLogged');
     });
 
+    Route::group(['prefix' => 'home'], function () {
+        Route::get('/', 'App\Http\Controllers\HomeController@index');
+    });
+
     Route::group(['prefix' => 'fluxocaixa'], function () {
         Route::get('/', 'App\Http\Controllers\FluxoCaixaController@index');
         Route::post('/', 'App\Http\Controllers\FluxoCaixaController@store');
