@@ -84,12 +84,11 @@ class AgendamentoController extends Controller
             $agendamento->user_id = $user->id;
             $agendamento->cliente_id = $request->cliente_id;
             $agendamento->save();
-
             foreach ($request->servicos as $servico) {
                 $servico_exists = null;
 
-                if (!empty($servico->uid)) {
-                    $servico_exists = Servico::where('uid', $servico->uid)->first();
+                if (!empty($servico['uid'])) {
+                    $servico_exists = Servico::where('uid', $servico['uid'])->first();
                 }
                 if (!$servico_exists) {
                     $servico_exists = new Servico();
@@ -193,8 +192,8 @@ class AgendamentoController extends Controller
             foreach ($request->servicos as $servico) {
                 $servico_exists = null;
 
-                if (!empty($servico->uid)) {
-                    $servico_exists = Servico::where('uid', $servico->uid)->first();
+                if (!empty($servico['uid'])) {
+                    $servico_exists = Servico::where('uid', $servico['uid'])->first();
                 }
                 if (!$servico_exists) {
                     $servico_exists = new Servico();
