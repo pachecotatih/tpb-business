@@ -26,8 +26,15 @@ class AgendamentoController extends Controller
             }
             $agendamentos = Agendamento::with([
                 'cliente:id,uid,nome',
-                'servicos:uid,nome'
-            ])->where('user_id', $user->id)->get();
+                'servicos:uid,nome,valor_padrao,duracao_padrao'
+            ])->where('user_id', $user->id)->get()->map(function ($agendamento) {
+                foreach ($agendamento->servicos as $servico) {
+                    $servico->duracao_padrao = $servico->pivot->duracao_servico;
+                    $servico->valor_padrao = $servico->pivot->valor_servico;
+                }
+                return $agendamento;
+            });
+
             return response()->json($agendamentos);
         } catch (\Throwable $th) {
             Log::error('AgendamentoController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
@@ -98,6 +105,8 @@ class AgendamentoController extends Controller
                     'duracao_servico' => $servico['duracao_padrao']
                 ]]);
             }
+
+            return response()->json($agendamento);
         } catch (\Throwable $th) {
             Log::error('AgendamentoController::store - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
             return response()->json([
@@ -114,15 +123,19 @@ class AgendamentoController extends Controller
     {
         try {
             $agendamento = Agendamento::with([
-                'cliente:uid,nome',
-                'servicos' => function ($query) {
-                    $query->where('ativo', true)->select('uid', 'nome', 'valor_padrao', 'duracao_padrao');
-                }
+                'cliente:id,uid,nome',
+                'servicos'
             ])->where('uid', $uid)->first();
             if (!$agendamento) {
                 return response()->json([
                     'message' => 'Agendamento nao encontrado.'
                 ], 404);
+            }
+            $clientes = Cliente::where('user_id', $agendamento->user_id)->get();
+            $agendamento->clientes = $clientes;
+            foreach ($agendamento->servicos as $servico) {
+                $servico->duracao_padrao = $servico->pivot->duracao_servico;
+                $servico->valor_padrao = $servico->pivot->valor_servico;
             }
             return response()->json($agendamento);
         } catch (\Throwable $th) {
@@ -213,6 +226,7 @@ class AgendamentoController extends Controller
                      'observacao' => ($agendamento->servicos->count() > 0)?'Serviços: ' . $agendamento->servicos->pluck('nome')->implode(', ').'.':'',
                 ]);
             }
+            return response()->json($agendamento);
         } catch (\Throwable $th) {
             Log::error('AgendamentoController::update - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
             return response()->json([
