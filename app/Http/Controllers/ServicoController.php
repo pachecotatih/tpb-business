@@ -20,7 +20,7 @@ class ServicoController extends Controller
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
-            $servicos = Servico::where('user_id', $user->id)->get();
+            $servicos = Servico::where('user_id', $user->id)->orderByDesc('created_at')->get();
             return response()->json($servicos);
         } catch (\Throwable $th) {
             Log::error('ServicoController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());

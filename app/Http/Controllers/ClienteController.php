@@ -20,7 +20,7 @@ class ClienteController extends Controller
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
-            $clientes = Cliente::where('user_id', $user->id)->get();
+            $clientes = Cliente::where('user_id', $user->id)->orderByDesc('created_at')->get();
             return response()->json($clientes);
         } catch (\Exception $e) {
             Log::error('ClienteController::index - ' . $e->getMessage(). ' - ' . $e->getCode(). ' - ' . $e->getFile(). ' - ' . $e->getLine());
