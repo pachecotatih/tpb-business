@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\DeleteUser;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use App\Models\UserSession;
@@ -150,6 +151,28 @@ class UserController extends Controller
             Log::error('UserController::update - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
             return response()->json([
                 'message' => 'Erro ao atualizar usuário.',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        try {
+            $user = User::where('uid', $request->header('user'))->first();
+            if (!$user) {
+                return response()->json(['message' => 'Usuário nao encontrado'], 404);
+            }
+            $timeNumber = now()->addMinutes(30);
+            $user->update([
+                'email' => $user->email . '-' . $timeNumber->timestamp
+            ]);
+            DeleteUser::dispatch($user->uid)->delay($timeNumber);
+            return response()->json(['message' => 'Usuário excluido com sucesso.']);
+        } catch (\Throwable $th) {
+            Log::error('UserController::destroy - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
+            return response()->json([
+                'message' => 'Erro ao excluir usuário.',
                 'error' => $th->getMessage()
             ], 500);
         }

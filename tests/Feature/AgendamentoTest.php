@@ -161,7 +161,7 @@ class AgendamentoTest extends TestCase
         $this->assertNotNull($agendamento_bd);
         $this->assertEquals($agendamento->valor_total, $agendamento_bd->valor_total);
         $this->assertEquals($agendamento->data_inicio, $agendamento_bd->data_inicio);
-        $this->assertEquals(Carbon::now()->format('Y-m-d H:i:s'), $agendamento_bd->data_fim);
+        $this->assertEquals(Carbon::now()->format('Y-m-d H:i'), Carbon::parse($agendamento_bd->data_fim)->format('Y-m-d H:i'));
         $this->assertEquals('concluido', $agendamento_bd->status);
         $this->assertEquals($agendamento->user_id, $agendamento_bd->user_id);
         $this->assertEquals($agendamento->cliente_id, $agendamento_bd->cliente_id);

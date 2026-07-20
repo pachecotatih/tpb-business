@@ -25,6 +25,7 @@ Route::middleware(['jwt.auth', 'ensure.user.header'])->group(function () {
     Route::group(['prefix' => 'user'], function () {
         Route::get('/', 'App\Http\Controllers\UserController@index');
         Route::put('/', 'App\Http\Controllers\UserController@update');
+        Route::delete('/', 'App\Http\Controllers\UserController@destroy');
         Route::post('/change-password', 'App\Http\Controllers\UserController@changePasswordLogged');
     });
 

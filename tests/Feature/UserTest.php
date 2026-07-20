@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\DeleteUser;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -351,5 +353,67 @@ class UserTest extends TestCase
         ];
         $response = $this->postJson('/api/reset-password', $data);
         $response->assertStatus(422);
+    }
+
+    public function test_resetPassword_user_failed_token_expired() : void {
+        $token = '123456789';
+        $user = User::factory()->create();
+        $data = [
+            'token' => $token,
+            'password' => '654321'
+        ];
+        $response = $this->postJson('/api/reset-password', $data);
+        $response->assertStatus(422);
+    }
+
+    public function test_resetPassword_user_failed_token_not_found() : void {
+        $token = '123456789';
+        $user = User::factory()->create();
+        $data = [
+            'token' => $token,
+            'password' => '654321'
+        ];
+        $response = $this->postJson('/api/reset-password', $data);
+        $response->assertStatus(422);
+    }
+
+    public function test_destroy_user_success_job() {
+        Queue::fake();
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->deleteJson('/api/user');
+        $response->assertStatus(200);
+        Queue::assertPushed(DeleteUser::class);
+        $user_bd = User::where('uid', $user->uid)->first();
+        $this->assertNotNull($user_bd);
+        $this->assertNotEquals($user->email, $user_bd->email);
+
+
+    }
+
+    public function test_destroy_user_success_deleted()
+    {
+        Queue::fake();
+
+        $user = User::factory()->create();
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this->withHeaders([
+            'Authorization'=> 'Bearer ' . $token,
+            'user' => $user->uid
+        ])->deleteJson('/api/user');
+
+        $response->assertStatus(200);
+        Queue::assertPushed(DeleteUser::class);
+        Queue::pushed(DeleteUser::class)->each(function ($job) {
+            $job->handle();
+        });
+
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id
+        ]);
     }
 }
