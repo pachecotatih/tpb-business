@@ -151,7 +151,7 @@ class UserTest extends TestCase
             'password' => '1234567'
         ];
         $response = $this->postJson('/api/login', $credentials);
-        $response->assertStatus(401);
+        $response->assertStatus(400);
     }
 
     public function test_index_user_success() : void {

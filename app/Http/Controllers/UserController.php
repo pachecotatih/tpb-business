@@ -294,7 +294,7 @@ class UserController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Credenciais inválidas.'
-            ], 401);
+            ], 400);
         }
 
         $accessToken = JWTAuth::fromUser($user);
