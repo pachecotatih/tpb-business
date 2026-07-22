@@ -260,16 +260,20 @@ GET /api/fluxo-caixa?
 
 ---
 
-## 🎨 Interface do Usuário (Em Desenvolvimento)
+## 🎨 Interface do Usuário
 
 Uma interface gráfica moderna será desenvolvida em um projeto separado com:
 
 - Dashboard intuitivo com resumo do fluxo de caixa
+- Cadastro de receitas e despesas no fluxo de caixa
+- Cadastro de clientes e serviços
 - Calendário visual para agendamentos
-- Gráficos de receitas e despesas
-- Relatórios exportáveis (PDF, Excel)
-- Notificações e lembretes
 - Responsivo para mobile
+- Gráficos de receitas e despesas (em breve)
+- Relatórios exportáveis (PDF, Excel) (em breve)
+- Notificações e lembretes (em breve)
+
+[Repositório da Interface Gráfica](https://github.com/pachecotatih/tpb_business_flutter)
 
 **Projeto Frontend**: *(Link será disponibilizado em breve)*
 
