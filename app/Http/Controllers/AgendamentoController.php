@@ -122,7 +122,7 @@ class AgendamentoController extends Controller
     {
         try {
             $agendamento = Agendamento::with([
-                'cliente:id,uid,nome',
+                'cliente:id,uid,nome,telefone,email',
                 'servicos'
             ])->where('uid', $uid)->first();
             if (!$agendamento) {
