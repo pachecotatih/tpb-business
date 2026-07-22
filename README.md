@@ -274,7 +274,10 @@ Uma interface gráfica moderna será desenvolvida em um projeto separado com:
 - Notificações e lembretes (em breve)
 
 **Projeto Frontend na Produção**: *(Link será disponibilizado em breve)*
+
 [Repositório da Interface Gráfica](https://github.com/pachecotatih/tpb_business_flutter)
+
+
 ---
 
 ## 📦 Requisitos do Sistema
