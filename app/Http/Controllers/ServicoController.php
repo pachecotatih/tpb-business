@@ -16,7 +16,7 @@ class ServicoController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = User::where('uid', $request->header('user'))->select('id')->first();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
@@ -56,7 +56,7 @@ class ServicoController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = User::where('uid', $request->header('user'))->select('id')->first();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }

@@ -21,7 +21,7 @@ class FluxoCaixaController extends Controller
         $total_entradas = 0;
         $total_saidas = 0;
         try {
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = User::where('uid', $request->header('user'))->select('id')->first();
             if (!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
@@ -120,7 +120,7 @@ class FluxoCaixaController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = User::where('uid', $request->header('user'))->select('id')->first();
             if (!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }

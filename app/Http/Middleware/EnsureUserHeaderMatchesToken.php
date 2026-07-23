@@ -26,7 +26,7 @@ class EnsureUserHeaderMatchesToken
             throw new \Exception('Usuário não autenticado.', 401);
         }
 
-        $user = User::where('uid', $request->header('user'))->first();
+        $user = User::where('uid', $request->header('user'))->select('id')->first();
         if (!$user) {
             throw new \Exception('Usuário não encontrado.', 404);
         }
