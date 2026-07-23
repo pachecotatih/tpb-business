@@ -16,11 +16,11 @@ class ServicoController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
-            $servicos = Servico::where('user_id', $user->id)->orderByDesc('created_at')->get();
+            $servicos = Servico::where('user_id', $user->id)->get()->sortByDesc('created_at')->values();
             return response()->json($servicos);
         } catch (\Throwable $th) {
             Log::error('ServicoController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
@@ -56,7 +56,7 @@ class ServicoController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }

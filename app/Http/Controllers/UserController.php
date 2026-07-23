@@ -26,7 +26,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = auth()->user();
 
             if (!$user) {
                 return response()->json(['message' => 'Usuário nao encontrado'], 404);
@@ -34,7 +34,7 @@ class UserController extends Controller
             return response()->json($user);
         } catch (\Throwable $th) {
             Log::error('UserController::index - ' . $th->getMessage(). ' - ' . $th->getCode(). ' - ' . $th->getFile(). ' - ' . $th->getLine());
-            return response()->json($th->getMessage(), $th->getCode())->setStatusCode($th->getCode());
+            return response()->json(['message' => 'Erro ao buscar usuário: ' . $th->getMessage()], 500);
         }
     }
 
@@ -110,7 +110,7 @@ class UserController extends Controller
     {
 
         try {
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = auth()->user();
             if (!$user) {
                 return response()->json(['message' => 'Usuário nao encontrado'], 404);
             }
@@ -159,7 +159,7 @@ class UserController extends Controller
     public function destroy(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = auth()->user();
             if (!$user) {
                 return response()->json(['message' => 'Usuário nao encontrado'], 404);
             }
@@ -265,7 +265,7 @@ class UserController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->first();
+            $user = auth()->user();
             if (!$user) {
                 return response()->json([
                     'message' => 'Usuário não encontrado.'

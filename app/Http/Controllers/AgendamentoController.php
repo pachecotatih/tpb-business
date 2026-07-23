@@ -20,7 +20,7 @@ class AgendamentoController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
@@ -71,7 +71,7 @@ class AgendamentoController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
@@ -130,8 +130,7 @@ class AgendamentoController extends Controller
                     'message' => 'Agendamento nao encontrado.'
                 ], 404);
             }
-            $clientes = Cliente::where('user_id', $agendamento->user_id)->get();
-            $agendamento->clientes = $clientes;
+            // Removida busca em lote de todos os clientes do usuário para evitar sobrecarga de memória (gargalo de rede/RAM)
             foreach ($agendamento->servicos as $servico) {
                 $servico->duracao_padrao = $servico->pivot->duracao_servico;
                 $servico->valor_padrao = $servico->pivot->valor_servico;

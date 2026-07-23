@@ -26,13 +26,8 @@ class EnsureUserHeaderMatchesToken
             throw new \Exception('Usuário não autenticado.', 401);
         }
 
-        $user = User::where('uid', $request->header('user'))->select('id')->first();
-        if (!$user) {
-            throw new \Exception('Usuário não encontrado.', 404);
-        }
-
-        if ($authenticatedUser->id !== $user->id) {
-            throw new \Exception('Usuário não autorizado.', 500);
+        if ($authenticatedUser->uid !== $request->header('user')) {
+            throw new \Exception('Usuário não autorizado.', 401);
         }
 
         return $next($request);

@@ -21,7 +21,7 @@ class FluxoCaixaController extends Controller
         $total_entradas = 0;
         $total_saidas = 0;
         try {
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if (!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
@@ -51,29 +51,25 @@ class FluxoCaixaController extends Controller
                 $fluxoCaixa->where('created_at', '<=', $data_registro_fim);
             }
 
-            $fluxoCaixa = $fluxoCaixa->where('user_id', $user->id)->get()->map(function ($item) {
-                    if ($item->tipo_movimentacao === 'saida') {
-                        $item->valor = $item->valor * (-1);
-                    }
-                    return $item;
-                });
+            $fluxoCaixa->where('user_id', $user->id);
 
-            if ($fluxoCaixa->isNotEmpty()) {
-                foreach ($fluxoCaixa as $item) {
-                    $saldo += $item->valor;
-                    if ($item->tipo_movimentacao === 'entrada') {
-                        $total_entradas += $item->valor;
-                    } else {
-                        $total_saidas += $item->valor;
-                    }
+            // Calcula os totais diretamente no banco de dados via SQL (extremamente rápido)
+            $total_entradas = (clone $fluxoCaixa)->where('tipo_movimentacao', 'entrada')->sum('valor');
+            $total_saidas = (clone $fluxoCaixa)->where('tipo_movimentacao', 'saida')->sum('valor');
+            $saldo = $total_entradas - $total_saidas;
+
+            $fluxoCaixaList = $fluxoCaixa->get()->map(function ($item) {
+                if ($item->tipo_movimentacao === 'saida') {
+                    $item->valor = $item->valor * (-1);
                 }
-            }
+                return $item;
+            });
 
             return response()->json([
-                'fluxo_caixa_list' => $fluxoCaixa,
+                'fluxo_caixa_list' => $fluxoCaixaList,
                 'saldo' => $saldo,
                 'total_entradas' => $total_entradas,
-                'total_saidas' => $total_saidas
+                'total_saidas' => $total_saidas * (-1)
             ], 200);
 
 
@@ -120,7 +116,7 @@ class FluxoCaixaController extends Controller
                 ], 422);
             }
 
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if (!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }

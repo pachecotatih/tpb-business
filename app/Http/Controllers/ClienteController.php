@@ -16,11 +16,11 @@ class ClienteController extends Controller
     public function index(Request $request)
     {
         try {
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
-            $clientes = Cliente::where('user_id', $user->id)->orderByDesc('created_at')->get();
+            $clientes = Cliente::where('user_id', $user->id)->get()->sortByDesc('created_at')->values();
             return response()->json($clientes);
         } catch (\Exception $e) {
             Log::error('ClienteController::index - ' . $e->getMessage(). ' - ' . $e->getCode(). ' - ' . $e->getFile(). ' - ' . $e->getLine());
@@ -53,7 +53,7 @@ class ClienteController extends Controller
                     'errors' => $validation->errors()
                 ], 422);
             }
-            $user = User::where('uid', $request->header('user'))->select('id')->first();
+            $user = auth()->user();
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
