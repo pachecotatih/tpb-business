@@ -1,7 +1,10 @@
 .git
 .gitignore
+.github
 .env
 .env.*
-vendor
 node_modules
+vendor
 storage/logs/*
+tests
+README.md
