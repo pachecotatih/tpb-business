@@ -41,6 +41,4 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 
 EXPOSE 10000
 
-RUN php artisan optimize
-
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan optimize && php artisan serve --host=0.0.0.0 --port=$PORT
