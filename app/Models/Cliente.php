@@ -22,6 +22,8 @@ class Cliente extends Model
         'user_id',
     ];
 
+    protected $with = [];
+
     protected static function boot()
     {
         parent::boot();

@@ -17,6 +17,8 @@ class Servico extends Model
         'ativo',
     ];
 
+    protected $with = [];
+
     public static function boot() {
         parent::boot();
         static::creating(function (Servico $servico) {

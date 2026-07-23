@@ -19,6 +19,8 @@ class Agendamento extends Model
         'cliente_id',
     ];
 
+    protected $with = [];
+
     public static function boot()
     {
         parent::boot();

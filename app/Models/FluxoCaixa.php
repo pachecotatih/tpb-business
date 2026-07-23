@@ -26,6 +26,8 @@ class FluxoCaixa extends Model
         'agendamento_id',
     ];
 
+    protected $with = [];
+
     protected static function boot()
     {
         parent::boot();
