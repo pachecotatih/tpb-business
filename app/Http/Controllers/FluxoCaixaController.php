@@ -41,14 +41,14 @@ class FluxoCaixaController extends Controller
             }
 
             if($data_registro_inicio && $data_registro_fim) {
-                $fluxoCaixa->whereBetween('created_at', [
+                $fluxoCaixa->whereBetween('data_pagamento', [
                     Carbon::parse($data_registro_inicio)->startOfDay(),
                     Carbon::parse($data_registro_fim)->endOfDay(),
                 ]);
             } else if ($data_registro_inicio) {
-                $fluxoCaixa->where('created_at', '>=', $data_registro_inicio);
+                $fluxoCaixa->where('data_pagamento', '>=', $data_registro_inicio);
             } else if ($data_registro_fim) {
-                $fluxoCaixa->where('created_at', '<=', $data_registro_fim);
+                $fluxoCaixa->where('data_pagamento', '<=', $data_registro_fim);
             }
 
             $fluxoCaixa->where('user_id', $user->id);
@@ -126,7 +126,7 @@ class FluxoCaixaController extends Controller
             $fluxoCaixa->tipo_movimentacao = $request->tipo_movimentacao;
             $fluxoCaixa->forma_pagamento = $request->forma_pagamento;
             $fluxoCaixa->data_vencimento = $request->data_vencimento;
-            $fluxoCaixa->data_pagamento = $request->data_pagamento;
+            $fluxoCaixa->data_pagamento = ($request->tipo_movimentacao == 'saida') ? Carbon::now() :$request->data_pagamento;
             $fluxoCaixa->pago = $request->pago ?? false;
             $fluxoCaixa->observacao = $request->observacao;
             $fluxoCaixa->user_id = $user->id;

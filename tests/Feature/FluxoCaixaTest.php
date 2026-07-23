@@ -75,7 +75,7 @@ class FluxoCaixaTest extends TestCase
     public function test_fluxocaixa_index_filter_data_registro_success(): void
     {
         $token = JWTAuth::fromUser($this->user);
-        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'), 'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
         FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s')]);
         FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s')]);
         $data_inicio = Carbon::now()->subDays(1)->format('Y-m-d H:i:s');
@@ -94,9 +94,9 @@ class FluxoCaixaTest extends TestCase
     public function test_fluxocaixa_index_filter_data_registro_empty_success(): void
     {
         $token = JWTAuth::fromUser($this->user);
-        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'), 'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
-        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'),'created_at' => Carbon::now()->subDays(4)->format('Y-m-d H:i:s')]);
-        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s'),'created_at' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(5)->create(['user_id' => $this->user->id, 'valor' => 10, 'tipo_movimentacao' => 'entrada', 'forma_pagamento' => 'dinheiro', 'pago' => true, 'data_pagamento' => Carbon::now()->subDays(4)->format('Y-m-d H:i:s')]);
+        FluxoCaixa::factory()->count(3)->create(['user_id' => $this->user->id, 'valor' => 5, 'tipo_movimentacao' => 'saida', 'forma_pagamento' => 'cartao', 'pago' => false, 'data_vencimento' => Carbon::now()->format('Y-m-d H:i:s'),'data_pagamento' => Carbon::now()->subDays(3)->format('Y-m-d H:i:s')]);
         $data_inicio = Carbon::now()->subDays(1)->format('Y-m-d H:i:s');
         $data_fim = Carbon::now()->addDays(1)->format('Y-m-d H:i:s');
         $response = $this->withHeaders([

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,6 +26,7 @@ class FluxoCaixaFactory extends Factory
             'pago' => fake()->boolean(),
             'observacao' => fake()->paragraph(),
             'user_id' => User::factory()->create()->id,
+            'data_pagamento' => Carbon::now()->format('Y-m-d H:i:s'),
         ];
     }
 }

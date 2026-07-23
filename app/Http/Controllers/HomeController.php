@@ -17,11 +17,11 @@ class HomeController extends Controller
             if(!$user) {
                 return response()->json(['message' => 'Usuário não encontrado'], 404);
             }
-            $saldo_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('created_at', Carbon::now()->format('Y-m-d'))->get()->sum(function ($item) {
+            $saldo_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('data_pagamento', Carbon::now()->format('Y-m-d'))->get()->sum(function ($item) {
                 return $item->tipo_movimentacao == 'entrada' ? $item->valor : $item->valor * (-1);
             });
-            $entradas_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('created_at', Carbon::now()->format('Y-m-d'))->where('tipo_movimentacao', 'entrada')->sum('valor');
-            $saidas_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('created_at', Carbon::now()->format('Y-m-d'))->where('tipo_movimentacao', 'saida')->sum('valor');
+            $entradas_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('data_pagamento', Carbon::now()->format('Y-m-d'))->where('tipo_movimentacao', 'entrada')->sum('valor');
+            $saidas_hoje = FluxoCaixa::where('user_id', $user->id)->whereDate('data_pagamento', Carbon::now()->format('Y-m-d'))->where('tipo_movimentacao', 'saida')->sum('valor');
             $agendamentos_hoje = Agendamento::with(['cliente', 'servicos:uid,nome'])->whereDate('data_inicio', Carbon::now()->format('Y-m-d'))->where('status', '!=', 'concluido')->where('user_id', $user->id)->get();
             return response()->json(['saldo_hoje' => $saldo_hoje, 'entradas_hoje' => $entradas_hoje, 'saidas_hoje' => $saidas_hoje * (-1), 'agendamentos_hoje' => $agendamentos_hoje]);
         } catch (\Throwable $th) {
